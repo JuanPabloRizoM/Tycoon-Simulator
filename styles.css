@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
+
+#game-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 
+    0 0 40px rgba(255, 165, 0, 0.3),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+#game-container canvas {
+  display: block;
+}

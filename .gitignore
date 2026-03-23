@@ -1,0 +1,33 @@
+# System
+.DS_Store
+Thumbs.db
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Game Debug/Test
+test_*.png
+test_*.py
+analyze_colors.py
+check_pixels.py
+check_test_mask.py
+debug_startup.py
+split_sprites.py
+verify_render.py
+process_assets.py
+audit_sprites.py
