@@ -5,6 +5,8 @@
 // Stateless — receives scene for Phaser factories only.
 // ============================================================
 
+import { THEME } from './Theme.js?v=6';
+
 /**
  * Draw full tianguis background: sky, clouds, sun, ground, buildings, banner.
  * @param {Phaser.Scene} scene
@@ -13,18 +15,18 @@
  * @returns {{ clouds: Phaser.GameObjects.Graphics[] }}
  */
 export function drawBackground(scene, width, height) {
-    // Sky with gradient
+    // Sky — warm sunset gradient (golden amber to soft peach)
     const sky = scene.add.graphics();
-    sky.fillGradientStyle(0x87CEEB, 0x87CEEB, 0xB3E5FC, 0xB3E5FC, 1);
+    sky.fillGradientStyle(0xD4875A, 0xD4875A, 0xE8C495, 0xE8C495, 1);
     sky.fillRect(0, 0, width, 130);
 
-    // Clouds (subtle, animated)
+    // Clouds (subtle, warm-tinted)
     const cloudY = [30, 50, 25, 55];
     const cloudX = [100, 350, 600, 850];
     const clouds = [];
     for (let i = 0; i < 4; i++) {
         const cloud = scene.add.graphics();
-        cloud.fillStyle(0xFFFFFF, 0.5 + Math.random() * 0.2);
+        cloud.fillStyle(0xFFF5E6, 0.45 + Math.random() * 0.15);
         const cw = 40 + Math.random() * 30;
         cloud.fillEllipse(0, 0, cw, 15);
         cloud.fillEllipse(cw * 0.3, -6, cw * 0.6, 12);
@@ -43,7 +45,7 @@ export function drawBackground(scene, width, height) {
         });
     }
 
-    // Sun with glow
+    // Sun with warm glow
     const sun = scene.add.graphics();
     sun.fillStyle(0xFFD700, 0.2);
     sun.fillCircle(width - 100, 50, 55);
@@ -65,22 +67,22 @@ export function drawBackground(scene, width, height) {
         ease: 'Sine.easeInOut'
     });
 
-    // Ground
+    // Ground — warm earth tone
     const ground = scene.add.graphics();
-    ground.fillGradientStyle(0xd4a76a, 0xd4a76a, 0xc49858, 0xc49858, 1);
+    ground.fillGradientStyle(0xC4A87A, 0xC4A87A, 0xB09570, 0xB09570, 1);
     ground.fillRect(0, 130, width, height - 130);
 
-    // Ground texture (dirt spots, pebbles)
+    // Ground texture (dirt spots, pebbles — warm tones)
     for (let i = 0; i < 50; i++) {
         const rx = Math.random() * width;
         const ry = 150 + Math.random() * (height - 220);
-        const shade = Math.random() > 0.5 ? 0xc49858 : 0xb8884a;
+        const shade = Math.random() > 0.5 ? 0xBE9058 : 0xA87E4A;
         ground.fillStyle(shade, 0.25 + Math.random() * 0.15);
         ground.fillCircle(rx, ry, 2 + Math.random() * 4);
     }
 
     // Worn path lines
-    ground.lineStyle(1, 0xb8884a, 0.15);
+    ground.lineStyle(1, 0xA87E4A, 0.15);
     for (let y = 200; y < height - 100; y += 60) {
         ground.beginPath();
         ground.moveTo(0, y);
@@ -90,47 +92,50 @@ export function drawBackground(scene, width, height) {
         ground.strokePath();
     }
 
-    // Background buildings
+    // Background buildings (warm muted browns, not grey)
     const buildings = scene.add.graphics();
     const buildingData = [
-        { x: 30, y: 50, w: 90, h: 80, color: 0xBCAAA4 },
-        { x: 180, y: 40, w: 70, h: 90, color: 0xD7CCC8 },
-        { x: 330, y: 55, w: 110, h: 75, color: 0xBCAAA4 },
-        { x: 530, y: 35, w: 80, h: 95, color: 0xCFD8DC },
-        { x: 680, y: 45, w: 100, h: 85, color: 0xD7CCC8 },
-        { x: 840, y: 55, w: 70, h: 75, color: 0xBCAAA4 }
+        { x: 30, y: 50, w: 90, h: 80, color: 0x8A7A6A },
+        { x: 180, y: 40, w: 70, h: 90, color: 0x9A8A7A },
+        { x: 330, y: 55, w: 110, h: 75, color: 0x8A7A6A },
+        { x: 530, y: 35, w: 80, h: 95, color: 0xA09080 },
+        { x: 680, y: 45, w: 100, h: 85, color: 0x9A8A7A },
+        { x: 840, y: 55, w: 70, h: 75, color: 0x8A7A6A }
     ];
 
     for (const b of buildingData) {
         buildings.fillStyle(b.color, 0.7);
         buildings.fillRect(b.x, b.y, b.w, b.h);
-        buildings.fillStyle(0x8D6E63, 0.4);
+        // Roof edge — warm brown
+        buildings.fillStyle(THEME.colors.madera, 0.4);
         buildings.fillRect(b.x - 3, b.y - 2, b.w + 6, 5);
-        buildings.fillStyle(0x90CAF9, 0.4);
+        // Windows — warm amber glow (not cold blue)
+        buildings.fillStyle(0xFFD9A0, 0.4);
         const windowW = 10, windowH = 12;
         for (let wx = b.x + 10; wx < b.x + b.w - 15; wx += 22) {
             buildings.fillRect(wx, b.y + 14, windowW, windowH);
             buildings.fillRect(wx, b.y + 36, windowW, windowH);
         }
-        buildings.fillStyle(0x795548, 0.5);
+        // Door — warm wood
+        buildings.fillStyle(THEME.colors.madera, 0.5);
         buildings.fillRoundedRect(b.x + b.w / 2 - 8, b.y + b.h - 22, 16, 22, { tl: 4, tr: 4, bl: 0, br: 0 });
     }
     buildings.setDepth(2);
 
-    // Title banner
+    // Title banner — warm wood + gold (already correct, reinforced)
     const banner = scene.add.graphics();
-    banner.fillStyle(0x4E342E, 0.9);
+    banner.fillStyle(THEME.colors.maderaOscura, 0.9);
     banner.fillRoundedRect(width / 2 - 150, 135, 300, 34, 8);
-    banner.fillStyle(0xFFD700, 1);
+    banner.fillStyle(THEME.colors.acentoAdvertencia, 1);
     banner.fillRoundedRect(width / 2 - 148, 137, 296, 30, 7);
-    banner.fillStyle(0xFF8F00, 1);
+    banner.fillStyle(THEME.colors.naranjaMango, 1);
     banner.fillCircle(width / 2 - 140, 152, 4);
     banner.fillCircle(width / 2 + 140, 152, 4);
     banner.setDepth(10);
 
     scene.add.text(width / 2, 152, '🏪 EL TIANGUIS 🏪', {
-        fontSize: '17px', fontFamily: 'Outfit', fontStyle: 'bold',
-        color: '#4E342E'
+        fontSize: '17px', fontFamily: THEME.fonts.main, fontStyle: 'bold',
+        color: '#2C1E12'
     }).setOrigin(0.5).setDepth(11);
 
     return { clouds };
@@ -180,13 +185,20 @@ export function placeDecorations(scene, width, height) {
         }
     }
 
-    // Light poles / lines between stalls
+    // Light poles / lines between stalls — warm brown
     const lines = scene.add.graphics();
-    lines.lineStyle(1, 0x8D6E63, 0.3);
+    lines.lineStyle(1, THEME.colors.madera, 0.3);
     lines.beginPath(); lines.moveTo(120, 180); lines.lineTo(780, 180); lines.strokePath();
 
-    // Banderines (papel picado) - Animated
-    const banderinColors = [0xFF6D00, 0xE91E63, 0x4CAF50, 0x2196F3, 0xFFEB3B, 0x9C27B0];
+    // Banderines (papel picado) — warm palette only, no neon pink or digital blue
+    const banderinColors = [
+        0xFF6D00,   // Warm orange
+        0xC0392B,   // Earthy red (lonaPrincipal)
+        0x4CAF50,   // Green
+        0xF0C040,   // Warm gold
+        0xFFEB3B,   // Yellow
+        0xE76F51    // Mango orange
+    ];
     for (let x = 130; x < 770; x += 20) {
         const colorPos = Math.floor(Math.random() * banderinColors.length);
         const color = banderinColors[colorPos];
@@ -217,10 +229,10 @@ export function placeDecorations(scene, width, height) {
  * @param {number} height
  */
 export function createAmbientEffects(scene, width, height) {
-    // Dust particles
+    // Dust particles — warm sandy tone
     for (let i = 0; i < 20; i++) {
         const dust = scene.add.graphics();
-        dust.fillStyle(0xd4a76a, 0.15 + Math.random() * 0.1);
+        dust.fillStyle(0xD4A86A, 0.15 + Math.random() * 0.1);
         dust.fillCircle(0, 0, 1 + Math.random() * 2);
         dust.setPosition(Math.random() * width, 150 + Math.random() * (height - 200));
         dust.setDepth(9998);
@@ -239,12 +251,12 @@ export function createAmbientEffects(scene, width, height) {
         });
     }
 
-    // Occasional leaf
+    // Occasional leaf — warm green
     scene.time.addEvent({
         delay: 6000,
         callback: () => {
             const leaf = scene.add.graphics();
-            leaf.fillStyle(0x4CAF50, 0.3);
+            leaf.fillStyle(0x6B8E23, 0.3);
             leaf.fillEllipse(0, 0, 6, 3);
             leaf.setPosition(-10, 50 + Math.random() * 80);
             leaf.setDepth(9997);

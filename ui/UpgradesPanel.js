@@ -4,6 +4,7 @@
 
 import { UPGRADE_TREES } from '../data/upgrades.js';
 import { STATE_KEYS, getState } from '../core/GameState.js';
+import { THEME, drawWarmOverlayPanel } from './Theme.js?v=6';
 
 /**
  * Toggle the upgrades panel.
@@ -26,21 +27,18 @@ export function toggleUpgrades(scene) {
     scene.upgradesPanel = [];
 
     const bg = scene.add.graphics().setDepth(9980);
-    bg.fillStyle(0x1a1a2e, 0.95);
-    bg.fillRoundedRect(panelX, panelY, panelW, panelH, 12);
-    bg.lineStyle(2, 0xFF8C00, 0.8);
-    bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 12);
+    drawWarmOverlayPanel(bg, panelX, panelY, panelW, panelH, THEME.colors.acentoAdvertencia);
     scene.upgradesPanel.push(bg);
 
     const title = scene.add.text(
         width / 2, panelY + 25,
         '⭐ Mejoras del Puesto',
-        { fontSize: '20px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#FFD700' }
+        { fontSize: '20px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F0C040' }
     ).setOrigin(0.5).setDepth(9981);
     scene.upgradesPanel.push(title);
 
     const closeBtn = scene.add.text(panelX + panelW - 30, panelY + 10, '✕', {
-        fontSize: '20px', fontFamily: 'Outfit', color: '#ff5555'
+        fontSize: '20px', fontFamily: THEME.fonts.main, color: '#C0392B'
     }).setDepth(9982).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => toggleUpgrades(scene));
     scene.upgradesPanel.push(closeBtn);
@@ -58,17 +56,17 @@ export function toggleUpgrades(scene) {
         const canAfford = money >= cost;
 
         const rowBg = scene.add.graphics().setDepth(9981);
-        rowBg.fillStyle(0x2a2a4e, 0.8);
+        rowBg.fillStyle(THEME.colors.madera, 0.4);
         rowBg.fillRoundedRect(panelX + 20, iy, panelW - 40, 50, 6);
         scene.upgradesPanel.push(rowBg);
 
         const nameText = scene.add.text(panelX + 35, iy + 8, `${tree.name} (Nvl ${currentLevel})`, {
-            fontSize: '15px', fontFamily: 'Outfit', fontStyle: 'bold', color: isMaxed ? '#4CAF50' : '#fff'
+            fontSize: '15px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: isMaxed ? '#4CAF50' : '#F5F0E8'
         }).setDepth(9982);
         scene.upgradesPanel.push(nameText);
 
         const descText = scene.add.text(panelX + 35, iy + 28, tree.description, {
-            fontSize: '12px', fontFamily: 'Outfit', color: '#aaa', wordWrap: { width: 300 }
+            fontSize: '12px', fontFamily: THEME.fonts.main, color: '#A09080', wordWrap: { width: 300 }
         }).setDepth(9982);
         scene.upgradesPanel.push(descText);
 
@@ -79,7 +77,7 @@ export function toggleUpgrades(scene) {
             scene.upgradesPanel.push(btnBg);
 
             const btnText = scene.add.text(panelX + panelW - 75, iy + 25, `$${cost}`, {
-                fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#ffffff'
+                fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F5F0E8'
             }).setOrigin(0.5).setDepth(9983);
             scene.upgradesPanel.push(btnText);
 
@@ -97,11 +95,11 @@ export function toggleUpgrades(scene) {
                 });
             }
 
-            // Minimal Tooltip
+            // Minimal Tooltip — warm dark background
             hitArea.on('pointerover', (pointer) => {
                 const txt = `Costo: $${cost}\nNivel ${currentLevel} -> Nivel ${currentLevel + 1}`;
                 scene.activeTooltipText = scene.add.text(pointer.x, pointer.y - 15, txt, {
-                    fontSize: '13px', fontFamily: 'Outfit', color: '#FFF', align: 'center', backgroundColor: '#000', padding: { x: 6, y: 6 }
+                    fontSize: '13px', fontFamily: THEME.fonts.main, color: '#F5F0E8', align: 'center', backgroundColor: '#2C1E12', padding: { x: 6, y: 6 }
                 }).setOrigin(0.5, 1).setDepth(10000);
                 scene.upgradesPanel.push(scene.activeTooltipText);
             });
@@ -114,14 +112,14 @@ export function toggleUpgrades(scene) {
             });
         } else {
             const maxText = scene.add.text(panelX + panelW - 75, iy + 25, 'MÁXIMO', {
-                fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#4CAF50'
+                fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#4CAF50'
             }).setOrigin(0.5).setDepth(9982);
             scene.upgradesPanel.push(maxText);
         }
     });
 
     const tip = scene.add.text(width / 2, panelY + panelH - 25, 'Cada mejora afecta las mecánicas del mercado al instante.', {
-        fontSize: '11px', fontFamily: 'Outfit', color: '#777'
+        fontSize: '11px', fontFamily: THEME.fonts.main, color: '#7A6858'
     }).setOrigin(0.5).setDepth(9981);
     scene.upgradesPanel.push(tip);
 }

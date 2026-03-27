@@ -23,11 +23,11 @@ const CHAT_COLORS = {
 };
 
 const SPEAKER_COLORS = {
-    player: THEME.colors.azulTurquesa,
+    player: THEME.colors.lonaSecundaria,
     npc: THEME.colors.verdeNopal,
     system: THEME.colors.cartonOscuro,
     success: THEME.colors.success,
-    error: THEME.colors.error
+    error: THEME.colors.acentoError
 };
 
 export const EMOTION_MAP = {
@@ -86,8 +86,8 @@ export function addChatMessage(chatCtx, speaker, text, type = 'system') {
     });
 
     const lineBg = add.graphics();
-    const lineColor = type === 'player' ? THEME.colors.azulTurquesa : type === 'npc' ? THEME.colors.ambarCemp :
-        type === 'success' ? THEME.colors.success : type === 'error' ? THEME.colors.error : THEME.colors.cuerito;
+    const lineColor = type === 'player' ? THEME.colors.lonaSecundaria : type === 'npc' ? THEME.colors.acentoAdvertencia :
+        type === 'success' ? THEME.colors.success : type === 'error' ? THEME.colors.acentoError : THEME.colors.cuerito;
     
     // Bubble background
     lineBg.fillStyle(type === 'npc' ? THEME.colors.cremaLona : THEME.colors.carton, 0.9);
@@ -182,7 +182,7 @@ export function createPatienceBar(scene, x, y, w) {
 export function updatePatienceDisplay(patienceCtx, patienceRatio) {
     const { indicator, barFill, barWidth, x, y } = patienceCtx;
     
-    let colorHex = '#a0a0e0';
+    let colorHex = '#F5F0E8';
     let colorVal = THEME.colors.verdeNopal;
     let text = 'Paciencia: 🟢🟢🟢';
 
@@ -192,12 +192,12 @@ export function updatePatienceDisplay(patienceCtx, patienceRatio) {
         colorVal = THEME.colors.verdeNopal;
     } else if (patienceRatio > 0.30) {
         text = 'Paciencia: 🟡🟡⚫';
-        colorHex = '#F4A261';
-        colorVal = THEME.colors.ambarCemp;
+        colorHex = '#F0C040';
+        colorVal = THEME.colors.acentoAdvertencia;
     } else {
         text = 'Paciencia: 🔴⚫⚫';
-        colorHex = '#E63946';
-        colorVal = THEME.colors.rojoChile;
+        colorHex = '#C0392B';
+        colorVal = THEME.colors.acentoError;
     }
 
     if (indicator) {

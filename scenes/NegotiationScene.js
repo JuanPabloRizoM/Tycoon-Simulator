@@ -62,32 +62,39 @@ export class NegotiationScene extends Phaser.Scene {
             this.children.removeAll();
         });
 
-        const { width, height } = this.cameras.main;
-
-        // === BACKGROUND ===
+        const { width, height } = this.cameras.main        // === BACKGROUND ===
         const bg = this.add.graphics();
         drawLonaBackground(bg, width, height);
+        // Warm dark overlay instead of pure black
+        const blur = this.add.graphics().setDepth(0);
+        blur.fillStyle(THEME.colors.fondoBase, 0.4);
+        blur.fillRect(0, 0, width, height);
 
-        // --- NEW HQ ASSET: Stall Table Surface ---
+        // --- NEW HQ ASSET: Stall Table Surface (Foreground) ---
         const tableSurface = this.add.image(width / 2, height, 'stall_table_hq').setOrigin(0.5, 1);
-        tableSurface.displayWidth = width;
-        tableSurface.scaleY = tableSurface.scaleX; // Maintain aspect ratio
-        tableSurface.setDepth(1);
-        tableSurface.setAlpha(0.65); // Dim table so it doesn't overpower the item and NPC
+        tableSurface.displayWidth = width * 1.4;
+        tableSurface.scaleY = tableSurface.scaleX * 0.7;
+        tableSurface.setDepth(10);
+        tableSurface.setAlpha(0.9);
 
-        // Main container with animated border
-        this.mainBorder = this.add.graphics();
-        this.drawAnimatedBorder(width, height);
+        // === MAIN HIERARCHY ===
+        
+        // 1. NPC (Primary Focus - Centered)
+        // We redefine the NPC section to be wide and centered
+        this.portrait = drawNpcPortrait(this, width/2 - 200, 20, 400, 320, this.npcData);
+        this.portrait.sprite.setDepth(5);
+        this.portrait.sprite.setScale(0.35); // SCALED UP for focus
+        this.portrait.sprite.setX(width / 2);
+        this.portrait.sprite.setY(340);
 
-        // === THREE-COLUMN TOP SECTION ===
-        // Left: NPC info   |   Center: Item   |   Right: Deal stats
-        const topH = 300;
-        this.drawNPCSection(30, 25, 290, topH);
-        this.drawItemSection(340, 25, 220, topH);
-        this.drawDealStats(580, 25, width - 610, topH);
+        // 2. ITEM (Secondary Focus - On Table)
+        this.drawItemOnTable(width / 2, height - 120, 180, 150);
 
-        // === BOTTOM SECTION: Negotiation Panel ===
-        this.drawNegotiationPanel(30, topH + 40, width - 60, height - topH - 60);
+        // 3. DEAL STATS (Moved to a floating tag or pinned paper)
+        this.drawDealStatsDiegetic(width - 160, 40, 140, 180);
+
+        // === BOTTOM SECTION: Negotiation Panel (Diegetic) ===
+        this.drawNegotiationPanel(30, 360, width - 60, height - 380);
 
         // === Start negotiation ===
         const eventMods = this.registry.get(STATE_KEYS.EVENT_MODIFIERS) || null;
@@ -304,18 +311,18 @@ export class NegotiationScene extends Phaser.Scene {
 
         // Condition bar (visual, clean)
         this.add.text(x + 15, y + 170, 'Condición', {
-            fontSize: '11px', fontFamily: 'Outfit', color: '#bbb'
+            fontSize: '11px', fontFamily: 'Outfit', color: '#A09080'
         });
         const condBarBg = this.add.graphics();
-        condBarBg.fillStyle(0x333333, 1);
+        condBarBg.fillStyle(THEME.colors.maderaOscura, 0.8);
         condBarBg.fillRoundedRect(x + 15, y + 188, w - 30, 10, 5);
         const condColor = this.itemData.condition > 0.7 ? 0x4CAF50 :
-            this.itemData.condition > 0.4 ? 0xFFC107 : 0xF44336;
+            this.itemData.condition > 0.4 ? 0xF0C040 : 0xC0392B;
         condBarBg.fillStyle(condColor, 1);
         condBarBg.fillRoundedRect(x + 15, y + 188, (w - 30) * this.itemData.condition, 10, 5);
 
         this.add.text(x + w - 15, y + 170, this.itemData.conditionLabel, {
-            fontSize: '11px', fontFamily: 'Outfit', color: condColor > 0xBB0000 ? '#F44336' : '#4CAF50'
+            fontSize: '11px', fontFamily: 'Outfit', color: condColor > 0xBB0000 ? '#C0392B' : '#4CAF50'
         }).setOrigin(1, 0);
 
         // Market value (prominent)
@@ -328,6 +335,80 @@ export class NegotiationScene extends Phaser.Scene {
         this.add.text(x + w / 2, y + 246, `$${marketValue}`, {
             fontSize: '20px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.textDark
         }).setOrigin(0.5);
+    }
+
+    /**
+     * Draw the item directly on the stall table (centered secondary focus)
+     */
+    drawItemOnTable(x, y, w, h) {
+        const rarityKey = this.itemData.rarity === 'común' ? 'comun' :
+            this.itemData.rarity === 'épico' ? 'epico' : this.itemData.rarity;
+        const itemTexture = this.itemData.textureHQ || `item_${rarityKey}`;
+        const isItemHQ = !!this.itemData.textureHQ;
+        const itemBaseScale = isItemHQ ? 0.35 : 1.8;
+
+        // Item Shadow
+        const shadow = this.add.graphics();
+        shadow.fillStyle(0x000000, 0.2);
+        shadow.fillEllipse(x, y + 40, 100, 30);
+        shadow.setDepth(11);
+
+        // Item Icon
+        const itemIcon = this.add.sprite(x, y, itemTexture);
+        itemIcon.setScale(itemBaseScale);
+        itemIcon.setDepth(12);
+
+        // Hover Floating Effect
+        this.tweens.add({
+            targets: itemIcon,
+            y: y - 10,
+            duration: 1500, yoyo: true, repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // Diegetic Price Tag (Pinned near the item on the table)
+        const tagGfx = this.add.graphics().setDepth(13);
+        const marketValue = this.economySystem.calculatePrice(this.itemData);
+        drawPriceTag(tagGfx, x + 50, y + 10, 80, 40, THEME.colors.ambarCemp);
+        this.add.text(x + 90, y + 30, `$${marketValue}`, {
+            fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.textDark
+        }).setOrigin(0.5).setDepth(14);
+    }
+
+    /**
+     * Draw deal stats as a pinned paper on the side
+     */
+    drawDealStatsDiegetic(x, y, w, h) {
+        const panel = this.add.graphics().setDepth(15);
+        drawPinnedPaper(panel, x, y, w, h, THEME.colors.cremaLona);
+
+        this.add.text(x + w / 2, y + 25, 'TU PUESTO', {
+            fontSize: '11px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.maderaOscura
+        }).setOrigin(0.5).setDepth(16).setAlpha(0.7);
+
+        this.moneyText = this.add.text(x + w / 2, y + 55, `$${this.playerMoney}`, {
+            fontSize: '24px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.verdeNopal
+        }).setOrigin(0.5).setDepth(16);
+
+        this.add.text(x + w / 2, y + 90, 'Reputación', {
+            fontSize: '10px', fontFamily: THEME.fonts.main, color: THEME.colors.maderaOscura
+        }).setOrigin(0.5).setDepth(16);
+
+        const repProgress = this.add.graphics().setDepth(16);
+        repProgress.fillStyle(0x333333, 0.3);
+        repProgress.fillRoundedRect(x + 15, y + 105, w - 30, 8, 4);
+        repProgress.fillStyle(THEME.colors.ambarCemp, 1);
+        repProgress.fillRoundedRect(x + 15, y + 105, (w - 30) * (this.playerReputation / 100), 8, 4);
+
+        this.add.text(x + w / 2, y + 130, 'Última Oferta', {
+            fontSize: '10px', fontFamily: THEME.fonts.main, color: THEME.colors.maderaOscura
+        }).setOrigin(0.5).setDepth(16);
+        this.lastOfferText = this.add.text(x + w / 2, y + 150, '---', {
+            fontSize: '16px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.rojoChile
+        }).setOrigin(0.5).setDepth(16);
+
+        // Patience bar (Wood frame)
+        this.patienceBarRefs = createPatienceBar(this, x + 15, y + h - 25, w - 30);
     }
 
     // ============================
@@ -408,10 +489,11 @@ export class NegotiationScene extends Phaser.Scene {
         drawRusticCard(chatBg, chatX, chatY, chatW, chatH, THEME.colors.cremaLona, THEME.colors.cuerito);
 
         // Chat header
-        chatBg.fillStyle(0x1a1a3e, 0.8);
+        // Chat header — warm wood bar
+        chatBg.fillStyle(THEME.colors.maderaOscura, 0.9);
         chatBg.fillRoundedRect(chatX, chatY, chatW, 24, { tl: 10, tr: 10, bl: 0, br: 0 });
         this.add.text(chatX + 10, chatY + 14, '💬 Negociación', {
-            fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#a0a0e0'
+            fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F5F0E8'
         }).setOrigin(0, 0.5).setDepth(10);
 
         // Store chat area coords as explicit context object
@@ -433,9 +515,9 @@ export class NegotiationScene extends Phaser.Scene {
         const ctrlW = w - chatW - 35;
         const ctrlH = h - 20;
 
-        // Controls background
+        // Controls background — warm muted brown
         const ctrlBg = this.add.graphics();
-        ctrlBg.fillStyle(0x0d0d20, 0.4);
+        ctrlBg.fillStyle(THEME.colors.fondoBase, 0.5);
         ctrlBg.fillRoundedRect(ctrlX, ctrlY, ctrlW, ctrlH, 10);
 
         // === PRESET OFFER BUTTONS (bigger, with glow) ===
@@ -443,7 +525,7 @@ export class NegotiationScene extends Phaser.Scene {
         const presets = [
             { label: '-30%', mult: 0.7, color: THEME.colors.error, textColor: THEME.colors.textLight },
             { label: '-15%', mult: 0.85, color: THEME.colors.naranjaMango, textColor: THEME.colors.textDark },
-            { label: 'Valor', mult: 1.0, color: THEME.colors.azulTurquesa, textColor: THEME.colors.textDark },
+            { label: 'Valor', mult: 1.0, color: THEME.colors.lonaSecundaria, textColor: THEME.colors.textLight },
             { label: '+15%', mult: 1.15, color: THEME.colors.success, textColor: THEME.colors.textLight },
             { label: '+30%', mult: 1.3, color: THEME.colors.verdeNopal, textColor: THEME.colors.textLight }
         ];
@@ -474,12 +556,12 @@ export class NegotiationScene extends Phaser.Scene {
 
             const btnText = this.add.text(bx + btnW / 2, by + 10, preset.label, {
                 fontSize: '13px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: preset.textColor,
-                stroke: '#000', strokeThickness: 1
+                stroke: '#2C1E12', strokeThickness: 1
             }).setOrigin(0.5).setDepth(11);
 
             const priceText = this.add.text(bx + btnW / 2, by + 24, `$${offerAmount}`, {
                 fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: '800', color: preset.textColor,
-                stroke: '#000', strokeThickness: 1
+                stroke: '#2C1E12', strokeThickness: 1
             }).setOrigin(0.5).setDepth(11);
 
             // Interactive zone
@@ -504,14 +586,14 @@ export class NegotiationScene extends Phaser.Scene {
         // === CUSTOM INPUT LABEL ===
         const inputY = btnStartY + 3 * (btnH + 6) + 4;
         this.add.text(ctrlX + ctrlW / 2, inputY, '✏️ Tu Oferta', {
-            fontSize: '13px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#a0a0e0'
+            fontSize: '13px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F5F0E8'
         }).setOrigin(0.5).setDepth(10);
 
-        // Input box placeholder (DOM input will overlay)
+        // Input box placeholder — warm organic
         this.inputPlaceholder = this.add.graphics().setDepth(9);
-        this.inputPlaceholder.fillStyle(0x0d0d20, 0.8);
+        this.inputPlaceholder.fillStyle(THEME.colors.fondoBase, 0.8);
         this.inputPlaceholder.fillRoundedRect(ctrlX + 8, inputY + 16, ctrlW - 16, 32, 6);
-        this.inputPlaceholder.lineStyle(1, 0x5d5dae, 0.5);
+        this.inputPlaceholder.lineStyle(1, THEME.colors.cuerito, 0.5);
         this.inputPlaceholder.strokeRoundedRect(ctrlX + 8, inputY + 16, ctrlW - 16, 32, 6);
 
         // Store input area coords for DOM input positioning
@@ -522,63 +604,63 @@ export class NegotiationScene extends Phaser.Scene {
             h: 32
         };
 
-        // Send button for custom offer
+        // Send button for custom offer (Hanging Sign)
         const sendBtnY = inputY + 52;
-        const sendBtnW = ctrlW - 16;
+        const sendBtnW = ctrlW / 2;
+        const sendBtnX = ctrlX + (ctrlW - sendBtnW) / 2;
         
-        const sendBg = this.add.image(ctrlX + 8 + sendBtnW / 2, sendBtnY + 16, 'ui_button_hq').setDepth(10);
-        sendBg.setDisplaySize(sendBtnW, 32);
-        sendBg.setTint(THEME.colors.azulTurquesa);
+        const sendGfx = this.add.graphics().setDepth(10);
+        drawHangingSign(sendGfx, sendBtnX, sendBtnY, sendBtnW, 36, THEME.colors.lonaSecundaria);
 
-        const sendText = this.add.text(ctrlX + 8 + sendBtnW / 2, sendBtnY + 16, '📨 Enviar Oferta', {
-            fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.textDark,
+        const sendText = this.add.text(sendBtnX + sendBtnW / 2, sendBtnY + 18, 'ENVIAR PRECIO', {
+            fontSize: '12px', fontFamily: THEME.fonts.main, fontStyle: '900', color: '#F5F0E8',
         }).setOrigin(0.5).setDepth(11);
 
-        const sendHit = this.add.zone(ctrlX + 8, sendBtnY, sendBtnW, 32).setOrigin(0)
+        const sendHit = this.add.zone(sendBtnX, sendBtnY, sendBtnW, 36).setOrigin(0)
             .setInteractive({ useHandCursor: true }).setDepth(12);
         sendHit.on('pointerover', () => {
-             sendBg.setTint(THEME.colors.textLight);
+             sendGfx.setAlpha(0.8);
+             this.tweens.add({ targets: sendText, scale: 1.1, duration: 100 });
         });
         sendHit.on('pointerout', () => {
-             sendBg.setTint(THEME.colors.azulTurquesa);
+             sendGfx.setAlpha(1);
+             this.tweens.add({ targets: sendText, scale: 1, duration: 100 });
         });
         sendHit.on('pointerdown', () => this.submitCustomOffer());
-        this.uiElements.push(sendHit, sendBg, sendText);
+        this.uiElements.push(sendHit, sendGfx, sendText);
 
-        // === ACTION BUTTONS (bottom row, tightened for 540p) ===
-        const actY = sendBtnY + 38;
+        // === ACTION BUTTONS (Price Tags on table) ===
+        const actY = sendBtnY + 45;
         const actionBtns = [
-            { label: '✅ Aceptar', color: THEME.colors.success, hoverColor: THEME.colors.textLight, action: () => this.acceptOffer() },
-            { label: '❌ Rechazar', color: THEME.colors.error, hoverColor: THEME.colors.textLight, action: () => this.walkAway() },
-            { label: '🔙 Salir', color: THEME.colors.cartonOscuro, hoverColor: THEME.colors.textLight, action: () => this.returnToTianguis() }
+            { label: 'ACEPTAR', color: THEME.colors.success, action: () => this.acceptOffer() },
+            { label: 'RECHAZAR', color: THEME.colors.error, action: () => this.walkAway() },
+            { label: 'SALIR', color: THEME.colors.cartonOscuro, action: () => this.returnToTianguis() }
         ];
 
-        const actBtnW = (ctrlW - 24) / 3;
+        const actBtnW = (ctrlW - 30) / 3;
         for (let i = 0; i < actionBtns.length; i++) {
             const act = actionBtns[i];
-            const ax = ctrlX + 8 + i * (actBtnW + 4);
+            const ax = ctrlX + 8 + i * (actBtnW + 5);
 
-            const aBg = this.add.image(ax + actBtnW / 2, actY + 20, 'ui_button_hq').setDepth(15);
-            aBg.setDisplaySize(actBtnW, 36);
-            aBg.setTint(act.color);
+            const aGfx = this.add.graphics().setDepth(15);
+            drawPriceTag(aGfx, ax, actY, actBtnW, 40, act.color);
 
-            const aText = this.add.text(ax + actBtnW / 2, actY + 18, act.label, {
-                fontSize: '12px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.textLight,
-                stroke: '#000', strokeThickness: 1
+            const aText = this.add.text(ax + actBtnW / 2 + 10, actY + 20, act.label, {
+                fontSize: '11px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.textLight,
             }).setOrigin(0.5).setDepth(16);
 
-            const aHit = this.add.zone(ax, actY, actBtnW, 36).setOrigin(0)
+            const aHit = this.add.zone(ax, actY, actBtnW, 40).setOrigin(0)
                 .setInteractive({ useHandCursor: true }).setDepth(17);
             aHit.on('pointerover', () => {
-                this.tweens.add({ targets: aText, scaleX: 1.1, scaleY: 1.1, duration: 100, ease: 'Back.easeOut' });
-                aBg.setTint(act.hoverColor);
+                this.tweens.add({ targets: aText, scale: 1.1, duration: 100, ease: 'Back.easeOut' });
+                aGfx.setAlpha(0.8);
             });
             aHit.on('pointerout', () => {
-                this.tweens.add({ targets: aText, scaleX: 1, scaleY: 1, duration: 100 });
-                aBg.setTint(act.color);
+                this.tweens.add({ targets: aText, scale: 1, duration: 100 });
+                aGfx.setAlpha(1);
             });
             aHit.on('pointerdown', act.action);
-            this.uiElements.push(aHit, aBg, aText);
+            this.uiElements.push(aHit, aGfx, aText);
         }
     }
 
@@ -601,10 +683,10 @@ export class NegotiationScene extends Phaser.Scene {
       top: ${canvasRect.top + this.inputRect.y * scaleY}px;
       width: ${this.inputRect.w * scaleX}px;
       height: ${this.inputRect.h * scaleY}px;
-      background: rgba(13, 13, 32, 0.9);
-      border: 1px solid rgba(93, 93, 174, 0.5);
+      background: rgba(44, 30, 18, 0.9);
+      border: 1px solid rgba(161, 136, 127, 0.5);
       border-radius: 6px;
-      color: #FFD700;
+      color: #F0C040;
       font-family: 'Outfit', sans-serif;
       font-size: ${12 * scaleY}px;
       font-weight: bold;
@@ -615,11 +697,11 @@ export class NegotiationScene extends Phaser.Scene {
       z-index: 1000;
     `;
         input.addEventListener('focus', () => {
-            input.style.borderColor = 'rgba(255, 215, 0, 0.6)';
-            input.style.boxShadow = '0 0 8px rgba(255, 215, 0, 0.2)';
+            input.style.borderColor = 'rgba(240, 192, 64, 0.6)';
+            input.style.boxShadow = '0 0 8px rgba(240, 192, 64, 0.2)';
         });
         input.addEventListener('blur', () => {
-            input.style.borderColor = 'rgba(93, 93, 174, 0.5)';
+            input.style.borderColor = 'rgba(161, 136, 127, 0.5)';
             input.style.boxShadow = 'none';
         });
         input.addEventListener('keydown', (e) => {
@@ -836,9 +918,9 @@ export class NegotiationScene extends Phaser.Scene {
             default: return; // No text for unknown reasons
         }
 
-        const color = type === 'success' ? '#4CAF50' : '#F44336';
+        const color = type === 'success' ? '#4CAF50' : '#C0392B';
         const feedback = this.add.text(400, 300, text, {
-            font: 'bold 28px Arial', fill: color, stroke: '#000', strokeThickness: 5
+            font: 'bold 28px Outfit', fill: color, stroke: '#2C1E12', strokeThickness: 5
         }).setOrigin(0.5).setDepth(200);
 
         this.tweens.add({

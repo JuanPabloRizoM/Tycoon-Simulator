@@ -251,9 +251,9 @@ export class NPCManager {
         const y = sprite.y - 80;
 
         const typeColors = {
-            coleccionista: '#9C27B0', turista: '#FF9800',
-            revendedor: '#4CAF50', cliente_normal: '#607D8B',
-            estafador: '#F44336'
+            coleccionista: '#8E6BA5', turista: '#FF9800',
+            revendedor: '#4CAF50', cliente_normal: '#8D7B6A',
+            estafador: '#C0392B'
         };
 
         const typeEmoji = {
@@ -267,25 +267,25 @@ export class NPCManager {
         // Background panel
         const labelBg = this.scene.add.graphics().setDepth(9998);
         const labelW = 120, labelH = 42;
-        labelBg.fillStyle(0x000000, 0.75);
+        labelBg.fillStyle(0x2C1E12, 0.85);
         labelBg.fillRoundedRect(x - labelW / 2, y - 5, labelW, labelH, 8);
         // Top color bar
         const barColor = parseInt((typeColors[npcData.type] || '#333').replace('#', '0x'));
         labelBg.fillStyle(barColor, 0.9);
         labelBg.fillRoundedRect(x - labelW / 2, y - 5, labelW, 4, { tl: 8, tr: 8, bl: 0, br: 0 });
         // Triangle pointer
-        labelBg.fillStyle(0x000000, 0.75);
+        labelBg.fillStyle(0x2C1E12, 0.85);
         labelBg.fillTriangle(x - 6, y + labelH - 5, x + 6, y + labelH - 5, x, y + labelH + 4);
         this.labelBg = labelBg;
 
         this.labelText = this.scene.add.text(x, y + 6, `${emoji} ${npcData.name}`, {
             fontSize: '12px', fontFamily: 'Outfit', fontStyle: 'bold',
-            color: '#ffffff', align: 'center'
+            color: '#F5F0E8', align: 'center'
         }).setOrigin(0.5, 0).setDepth(9999);
 
         this.labelSubText = this.scene.add.text(x, y + 22, npcData.type.replace('_', ' '), {
             fontSize: '10px', fontFamily: 'Outfit',
-            color: typeColors[npcData.type] || '#aaa', align: 'center'
+            color: typeColors[npcData.type] || '#A09080', align: 'center'
         }).setOrigin(0.5, 0).setDepth(9999);
     }
 

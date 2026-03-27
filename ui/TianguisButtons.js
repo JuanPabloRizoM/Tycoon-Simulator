@@ -1,7 +1,7 @@
 // Stateless renderer: creates buttons and wires them to callbacks
 // ============================================================
 
-import { THEME, drawRusticCard } from './Theme.js?v=6';
+import { THEME, drawRusticCard, drawHangingSign } from './Theme.js?v=6';
 
 /**
  * Create the HUD action buttons at the bottom of the screen.
@@ -13,35 +13,36 @@ import { THEME, drawRusticCard } from './Theme.js?v=6';
  */
 export function createUIButtons(scene, width, height, callbacks) {
     const btnConfig = [
-        { text: '📦 Inventario',   x: width - 130, color: THEME.colors.azulTurquesa, action: callbacks.onInventory },
-        { text: '📊 Mercado',      x: width - 260, color: THEME.colors.verdeNopal, action: callbacks.onMarket },
-        { text: '⏩ Sig. Día',     x: 20,          color: THEME.colors.rojoChile, action: callbacks.onAdvanceDay },
-        { text: '⭐ Mejora',       x: 150,         color: THEME.colors.ambarCemp, action: callbacks.onUpgrade }
+        { text: 'Inventario', x: width - 110, y: height - 55, color: THEME.colors.lonaSecundaria, action: callbacks.onInventory },
+        { text: 'Mercado',    x: width - 215, y: height - 55, color: THEME.colors.verdeNopal,     action: callbacks.onMarket },
+        { text: 'Sig. Día',   x: 15,          y: height - 55, color: THEME.colors.acentoError,    action: callbacks.onAdvanceDay },
+        { text: 'Mejora',     x: 120,         y: height - 55, color: THEME.colors.acentoAdvertencia, action: callbacks.onUpgrade }
     ];
 
     for (const cfg of btnConfig) {
         const bg = scene.add.graphics().setDepth(9998);
-        drawRusticCard(bg, cfg.x, height - 50, 120, 42, cfg.color, THEME.colors.textDark);
+        // Draw as hanging sign (cardboard style)
+        drawHangingSign(bg, cfg.x, cfg.y, 90, 38, cfg.color);
 
-        const btn = scene.add.text(cfg.x + 60, height - 29, cfg.text, {
-            fontSize: '13px', fontFamily: THEME.fonts.main, fontStyle: '900',
+        const btn = scene.add.text(cfg.x + 45, cfg.y + 19, cfg.text, {
+            fontSize: '11px', fontFamily: THEME.fonts.main, fontStyle: '900',
             color: THEME.colors.textLight,
-            stroke: '#000', strokeThickness: 1
+            stroke: '#2C1E12', strokeThickness: 1
         }).setOrigin(0.5).setDepth(9999).setInteractive({ useHandCursor: true });
 
         btn.on('pointerover', () => {
             scene.tweens.add({
-                targets: [btn, bg], y: { from: 0, to: -3 },
-                duration: 100, ease: 'Sine.easeOut'
+                targets: [btn], scaleX: 1.1, scaleY: 1.1,
+                duration: 100, ease: 'Back.easeOut'
             });
-            btn.setScale(1.1);
+            bg.setAlpha(0.8);
         });
         btn.on('pointerout', () => {
             scene.tweens.add({
-                targets: [btn, bg], y: 0,
-                duration: 100, ease: 'Sine.easeOut'
+                targets: [btn], scaleX: 1, scaleY: 1,
+                duration: 100
             });
-            btn.setScale(1);
+            bg.setAlpha(1);
         });
         btn.on('pointerdown', cfg.action);
     }

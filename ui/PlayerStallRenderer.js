@@ -36,54 +36,39 @@ export function drawPlayerStall(scene, width, height, level) {
         ease: 'Sine.easeInOut'
     });
 
-    // Player stall sprite
-    const stallKey = scene.textures.exists('player_stall') ? 'player_stall' : 'stall';
-    const stall = scene.add.sprite(px, py, stallKey);
-    stall.setScale(1.2);
-    stall.setDepth(py);
+    // 1. STALL TABLE (Foreground focus)
+    // We use the HQ table asset and scale it wide to fill the bottom
+    const stall = scene.add.image(px, height + 10, 'stall_table_hq').setOrigin(0.5, 1);
+    stall.displayWidth = width * 1.2; // Over-the-counter illusion
+    stall.scaleY = stall.scaleX * 0.8; // Slightly squashed for perspective
+    stall.setDepth(9000); // Behind HUD but in front of everything else
 
-    // Label — evolves with level
+    // 2. STALL LABEL (Diegetic paper pinned to the wood)
+    const labelW = 160, labelH = 40;
+    const labelBg = scene.add.graphics().setDepth(9001);
+    drawRusticCard(labelBg, px - labelW / 2, height - 50, labelW, labelH, THEME.colors.cremaLona);
+
     const stallLabels = [
-        '⭐️ Mi Puesto ⭐️',
-        '⭐️ Mi Negocito ⭐️',
-        '⭐️⭐️ Mi Templo ⭐️⭐️',
-        '🏪 Negocio Próspero 🏪',
-        '🏪 El Rey del Tianguis 🏪'
+        'MI PUESTO',
+        'MI NEGOCITO',
+        'MI TEMPLO',
+        'NEGOCIO PRÓSPERO',
+        'EL REY DEL TIANGUIS'
     ];
     
-    const labelBg = scene.add.graphics();
-    drawRusticCard(labelBg, px - 90, py + 40, 180, 28, THEME.colors.ambarCemp, THEME.colors.textDark);
-    labelBg.setDepth(py + 1);
+    scene.add.text(px, height - 30, stallLabels[level - 1], {
+        fontSize: '12px', fontFamily: THEME.fonts.main, fontStyle: 'bold',
+        color: THEME.colors.maderaOscura
+    }).setOrigin(0.5, 1).setDepth(9002);
 
-    scene.add.text(px, py + 54, stallLabels[level - 1], {
-        fontSize: '13px', fontFamily: THEME.fonts.main, fontStyle: 'bold',
-        color: THEME.colors.textDark
-    }).setOrigin(0.5).setDepth(py + 2);
-
-    // Player character
-    const playerSprite = scene.add.sprite(px, py - 40, 'player', 0);
-    playerSprite.setScale(0.9);
-    playerSprite.setDepth(py + 2);
-
-    scene.tweens.add({
-        targets: playerSprite,
-        scaleY: { from: 0.9, to: 0.92 },
-        duration: 1500, yoyo: true, repeat: -1,
-        ease: 'Sine.easeInOut'
-    });
-
-    scene.time.addEvent({
-        delay: 5000,
-        callback: () => {
-            playerSprite.setFlipX(!playerSprite.flipX);
-            scene.tweens.add({
-                targets: playerSprite,
-                y: playerSprite.y - 2,
-                duration: 200, yoyo: true, ease: 'Sine.easeOut'
-            });
-        },
-        loop: true
-    });
+    // 3. AMBIENT SHADOWS/DETAILS ON TABLE
+    // (Simulating items lying around via subtle graphics)
+    const tableDetails = scene.add.graphics().setDepth(9001);
+    tableDetails.fillStyle(0x000000, 0.1);
+    // Random "item" shadows on the table
+    for(let i=0; i<3; i++) {
+        tableDetails.fillEllipse(px + (i-1)*150, height-20, 80, 20);
+    }
 
     // Layered upgrade visuals (delegated)
     drawStallUpgrades(scene, px, py, level);

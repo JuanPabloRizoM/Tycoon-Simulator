@@ -18,12 +18,12 @@ export class BootScene extends Phaser.Scene {
         const barY = height / 2 + 40;
 
         const bg = this.add.graphics();
-        bg.fillStyle(0x1a1a2e, 1);
+        bg.fillStyle(0x2C1E12, 1);
         bg.fillRect(0, 0, width, height);
 
         this.add.text(width / 2, height / 2 - 60, '🏪 TIANGUIS TYCOON', {
             fontSize: '36px', fontFamily: 'Outfit', fontStyle: 'bold',
-            color: '#FFD700', stroke: '#8B4513', strokeThickness: 4
+            color: '#F0C040', stroke: '#2C1E12', strokeThickness: 4
         }).setOrigin(0.5);
 
         const npcTypes = ['turista', 'revendedor', 'coleccionista', 'cliente_normal', 'estafador'];

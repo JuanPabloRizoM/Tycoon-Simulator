@@ -29,10 +29,10 @@ const BREATHE_SCALE_DELTA = 0.01; // breathing reduces scale by this amount
 
 // NPC type badge config (visual only, no logic)
 const TYPE_BADGE = {
-    coleccionista: { color: 0x9C27B0, label: 'COLECCIONISTA', emoji: '🏆' },
+    coleccionista: { color: 0x8E6BA5, label: 'COLECCIONISTA', emoji: '🏆' },
     turista:       { color: 0xFF9800, label: 'TURISTA',       emoji: '📸' },
     revendedor:    { color: 0x4CAF50, label: 'REVENDEDOR',    emoji: '💰' },
-    cliente_normal:{ color: 0x607D8B, label: 'CLIENTE',       emoji: '👤' },
+    cliente_normal:{ color: 0x8D7B6A, label: 'CLIENTE',       emoji: '👤' },
     estafador:     { color: 0x795548, label: 'VISITANTE',     emoji: '🧑' }
 };
 

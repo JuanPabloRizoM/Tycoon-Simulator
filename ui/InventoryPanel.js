@@ -3,6 +3,8 @@
 // Stateless: receives scene + deps, returns panel elements array
 // ============================================================
 
+import { THEME, drawWarmOverlayPanel } from './Theme.js?v=6';
+
 /**
  * Toggle the inventory panel on/off.
  * Manages lifecycle via scene.inventoryPanel array.
@@ -28,16 +30,13 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
     scene.inventoryPanel = [];
 
     const bg = scene.add.graphics().setDepth(9980);
-    bg.fillStyle(0x1a1a2e, 0.95);
-    bg.fillRoundedRect(panelX, panelY, panelW, panelH, 12);
-    bg.lineStyle(2, 0xFFD700, 0.6);
-    bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 12);
+    drawWarmOverlayPanel(bg, panelX, panelY, panelW, panelH, THEME.colors.acentoAdvertencia);
     scene.inventoryPanel.push(bg);
 
     const title = scene.add.text(
         width / 2, panelY + 25,
         `📦 Inventario (${inventoryManager.getItemCount()}/${inventoryManager.getCapacity()})`,
-        { fontSize: '18px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#FFD700' }
+        { fontSize: '18px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F0C040' }
     ).setOrigin(0.5).setDepth(9981);
     scene.inventoryPanel.push(title);
 
@@ -48,7 +47,7 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
         const empty = scene.add.text(
             width / 2, startY + 40,
             'Tu inventario está vacío.\n¡Negocia con los NPCs para conseguir objetos!',
-            { fontSize: '14px', fontFamily: 'Outfit', color: '#999', align: 'center', wordWrap: { width: 350 } }
+            { fontSize: '14px', fontFamily: THEME.fonts.main, color: '#A09080', align: 'center', wordWrap: { width: 350 } }
         ).setOrigin(0.5).setDepth(9981);
         scene.inventoryPanel.push(empty);
     } else {
@@ -57,7 +56,7 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
             const iy = startY + i * 50;
 
             const rowBg = scene.add.graphics().setDepth(9981);
-            rowBg.fillStyle(0x2a2a4e, 0.8);
+            rowBg.fillStyle(THEME.colors.madera, 0.4);
             rowBg.fillRoundedRect(panelX + 15, iy, panelW - 30, 42, 6);
             scene.inventoryPanel.push(rowBg);
 
@@ -68,14 +67,14 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
             scene.inventoryPanel.push(dot);
 
             const nameText = scene.add.text(panelX + 45, iy + 6, item.name, {
-                fontSize: '13px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#fff'
+                fontSize: '13px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F5F0E8'
             }).setDepth(9982);
             scene.inventoryPanel.push(nameText);
 
             const info = scene.add.text(
                 panelX + 45, iy + 24,
                 `${item.rarity} · ${item.conditionLabel} · $${item.purchasePrice || '?'}`,
-                { fontSize: '11px', fontFamily: 'Outfit', color: '#aaa' }
+                { fontSize: '11px', fontFamily: THEME.fonts.main, color: '#A09080' }
             ).setDepth(9982);
             scene.inventoryPanel.push(info);
 
@@ -84,8 +83,8 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
                 panelX + panelW - 45, iy + 14,
                 `$${marketValue}`,
                 {
-                    fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold',
-                    color: marketValue > (item.purchasePrice || 0) ? '#4CAF50' : '#F44336'
+                    fontSize: '14px', fontFamily: THEME.fonts.main, fontStyle: 'bold',
+                    color: marketValue > (item.purchasePrice || 0) ? '#4CAF50' : '#C0392B'
                 }
             ).setOrigin(1, 0.5).setDepth(9982);
             scene.inventoryPanel.push(valText);
@@ -93,7 +92,7 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
     }
 
     const closeBtn = scene.add.text(panelX + panelW - 30, panelY + 10, '✕', {
-        fontSize: '20px', fontFamily: 'Outfit', color: '#ff5555'
+        fontSize: '20px', fontFamily: THEME.fonts.main, color: '#C0392B'
     }).setDepth(9982).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => toggleInventory(scene, inventoryManager, economySystem));
     scene.inventoryPanel.push(closeBtn);
@@ -103,7 +102,7 @@ export function toggleInventory(scene, inventoryManager, economySystem) {
     const statsText = scene.add.text(
         width / 2, statsY,
         `Compras: ${stats.totalBuys} | Ventas: ${stats.totalSells} | Ganancia: $${stats.totalProfit}`,
-        { fontSize: '11px', fontFamily: 'Outfit', color: '#aaa' }
+        { fontSize: '11px', fontFamily: THEME.fonts.main, color: '#A09080' }
     ).setOrigin(0.5).setDepth(9982);
     scene.inventoryPanel.push(statsText);
 }

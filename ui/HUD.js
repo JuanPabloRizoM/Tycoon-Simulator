@@ -3,7 +3,7 @@
 // Muestra: dinero, nivel, reputación, día, eventos
 // ============================================================
 
-import { THEME, drawRusticCard, drawWoodPanel, drawPriceTag } from './Theme.js?v=6';
+import { THEME, drawRusticCard, drawWoodPanel, drawPriceTag, drawPinnedPaper, drawHangingSign } from './Theme.js?v=6';
 
 export class HUD {
     constructor(scene) {
@@ -12,66 +12,74 @@ export class HUD {
     }
 
     create() {
-        const { width } = this.scene.cameras.main;
+        const { width, height } = this.scene.cameras.main;
 
-        // HUD Background bar - Wooden shelf style
-        const bg = this.scene.add.graphics().setDepth(9000);
-        drawWoodPanel(bg, 10, 8, width - 20, 48);
-        this.elements.push(bg);
-
-        // Individual stat cards
+        // HUD Background - NO MORE full bar. We use individual diegetic bits.
         const cardGfx = this.scene.add.graphics().setDepth(9001);
         this.elements.push(cardGfx);
 
-        // Money Card (Price Tag style)
-        drawPriceTag(cardGfx, 20, 14, 140, 36, THEME.colors.verdeNopal);
-        const coinIcon = this.scene.add.sprite(40, 32, 'coin').setScale(0.8).setDepth(9002);
-        this.elements.push(coinIcon);
-
-        this.moneyText = this.scene.add.text(56, 32, '$500', {
-            fontSize: '18px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.textLight,
-            stroke: '#000', strokeThickness: 1
-        }).setOrigin(0, 0.5).setDepth(9002);
+        // --- MONEY (Pinned Paper at Top Left) ---
+        const moneyW = 120, moneyH = 40;
+        drawPinnedPaper(cardGfx, 20, 20, moneyW, moneyH, THEME.colors.cremaLona);
+        
+        this.moneyText = this.scene.add.text(20 + moneyW / 2, 42, '$500', {
+            fontSize: '18px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.verdeNopal,
+        }).setOrigin(0.5).setDepth(9002);
         this.elements.push(this.moneyText);
 
-        // Level/Stall Card
-        drawRusticCard(cardGfx, 170, 14, 170, 36, THEME.colors.cremaLona, THEME.colors.cuerito);
-        this.levelText = this.scene.add.text(180, 22, '⭐ Nivel 1', {
-            fontSize: '12px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.textDark
-        }).setOrigin(0, 0.5).setDepth(9002);
-        this.elements.push(this.levelText);
+        const moneyLabel = this.scene.add.text(20 + moneyW / 2, 30, 'EFECTIVO', {
+            fontSize: '9px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.maderaOscura
+        }).setOrigin(0.5).setDepth(9002).setAlpha(0.7);
+        this.elements.push(moneyLabel);
 
-        this.levelName = this.scene.add.text(180, 38, 'Puesto improvisado', {
-            fontSize: '10px', fontFamily: THEME.fonts.main, color: THEME.colors.textDark, fontStyle: 'italic'
-        }).setOrigin(0, 0.5).setDepth(9002);
-        this.elements.push(this.levelName);
+        // --- DAY (Hanging Sign at Top Right) ---
+        const dayW = 100, dayH = 45;
+        const dayX = width - 120;
+        drawHangingSign(cardGfx, dayX, 25, dayW, dayH, THEME.colors.carton);
+        
+        this.dayText = this.scene.add.text(dayX + dayW / 2, 25 + 22, 'DÍA 1', {
+            fontSize: '16px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.maderaOscura
+        }).setOrigin(0.5).setDepth(9002);
+        this.elements.push(this.dayText);
 
-        // Reputation Card
-        drawRusticCard(cardGfx, 350, 14, 160, 36, THEME.colors.azulTurquesa, THEME.colors.textDark);
-        this.repText = this.scene.add.text(360, 32, '🤝 Reputación', {
-            fontSize: '12px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.textDark
+        // --- REPUTATION (Cardboard scrap below Money) ---
+        const repX = 20, repY = 75, repW = 120, repH = 30;
+        drawRusticCard(cardGfx, repX, repY, repW, repH, THEME.colors.carton, THEME.colors.maderaOscura);
+        
+        this.repText = this.scene.add.text(repX + 10, repY + 15, '🤝 50%', {
+            fontSize: '11px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: THEME.colors.maderaOscura
         }).setOrigin(0, 0.5).setDepth(9002);
         this.elements.push(this.repText);
 
         this.repBar = this.scene.add.graphics().setDepth(9002);
         this.elements.push(this.repBar);
 
-        // Day Tag (Price Tag style)
-        drawPriceTag(cardGfx, 520, 14, 120, 36, THEME.colors.rojoChile);
-        this.dayText = this.scene.add.text(580, 32, '📅 Día 1', {
-            fontSize: '16px', fontFamily: THEME.fonts.main, fontStyle: '900', color: THEME.colors.textLight
-        }).setOrigin(0.5, 0.5).setDepth(9002);
-        this.elements.push(this.dayText);
-
-        // Inventory count Card
-        drawPriceTag(cardGfx, 650, 14, 100, 36, THEME.colors.ambarCemp);
-        this.invText = this.scene.add.text(700, 32, '📦 0/10', {
-            fontSize: '13px', fontFamily: THEME.fonts.main, color: THEME.colors.textDark, fontStyle: 'bold'
-        }).setOrigin(0.5, 0.5).setDepth(9002);
+        // --- INVENTORY (Pinned paper bottom right or top right below day?) ---
+        // Let's put it top right below day
+        const invX = width - 120, invY = 85, invW = 100, invH = 30;
+        drawPinnedPaper(cardGfx, invX, invY, invW, invH, THEME.colors.cremaLona);
+        
+        this.invText = this.scene.add.text(invX + invW / 2, invY + 15, '📦 0/10', {
+            fontSize: '12px', fontFamily: THEME.fonts.main, color: '#2C1E12', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(9002);
         this.elements.push(this.invText);
 
-        // Event indicator
-        this.eventText = this.scene.add.text(width - 35, 32, '', {
+        // --- LEVEL (Small wood tag below Inventory) ---
+        const lvlX = width - 120, lvlY = 125, lvlW = 100, lvlH = 22;
+        drawRusticCard(cardGfx, lvlX, lvlY, lvlW, lvlH, THEME.colors.madera, THEME.colors.maderaOscura);
+        
+        this.levelText = this.scene.add.text(lvlX + lvlW / 2, lvlY + 7, '⭐ Nivel 1', {
+            fontSize: '10px', fontFamily: THEME.fonts.main, fontStyle: 'bold', color: '#F5F0E8'
+        }).setOrigin(0.5).setDepth(9002);
+        this.elements.push(this.levelText);
+
+        this.levelName = this.scene.add.text(lvlX + lvlW / 2, lvlY + 17, 'Puesto improvisado', {
+            fontSize: '7px', fontFamily: THEME.fonts.main, color: '#F5F0E8'
+        }).setOrigin(0.5).setDepth(9002).setAlpha(0.8);
+        this.elements.push(this.levelName);
+
+        // Event indicator (Hanging bit at far right)
+        this.eventText = this.scene.add.text(width - 140, 48, '', {
             fontSize: '24px', fontFamily: THEME.fonts.main
         }).setOrigin(1, 0.5).setDepth(9002).setInteractive({ useHandCursor: true });
         this.elements.push(this.eventText);
@@ -83,8 +91,8 @@ export class HUD {
             
             const eventDesc = events.map(e => `${e.icon} ${e.name}`).join('\n');
             this.activeTooltipText = this.scene.add.text(pointer.x - 10, pointer.y + 25, eventDesc, {
-                fontSize: '14px', fontFamily: THEME.fonts.main, color: THEME.colors.textLight, 
-                align: 'right', backgroundColor: '#000', padding: { x: 8, y: 8 }
+                fontSize: '14px', fontFamily: THEME.fonts.main, color: '#F5F0E8', 
+                align: 'right', backgroundColor: '#2C1E12', padding: { x: 8, y: 8 }
             }).setOrigin(1, 0).setDepth(10000);
             this.elements.push(this.activeTooltipText);
         });
@@ -112,23 +120,23 @@ export class HUD {
         this.moneyText.setText(`$${state.money || 0}`);
 
         // Level
-        this.levelText.setText(`⭐ Nivel ${state.level || 1}`);
-        this.levelName.setText(LEVEL_NAMES[state.level] || 'Puesto improvisado');
+        if (this.levelText) this.levelText.setText(`⭐ Nivel ${state.level || 1}`);
+        if (this.levelName) this.levelName.setText(LEVEL_NAMES[state.level] || 'Puesto improvisado');
 
         // Reputation
         const rep = state.reputation || 50;
-        this.repText.setText(`🤝 ${rep}`);
+        this.repText.setText(`🤝 ${rep}%`);
 
         if (this.repBar) {
             this.repBar.clear();
             this.repBar.fillStyle(0x333333, 0.5);
-            this.repBar.fillRoundedRect(445, 23, 60, 18, 4);
-            this.repBar.fillStyle(THEME.colors.naranjaMango, 1);
-            this.repBar.fillRoundedRect(445, 23, 60 * (rep / 100), 18, 4);
+            this.repBar.fillRoundedRect(60, 75 + 10, 75, 10, 4);
+            this.repBar.fillStyle(THEME.colors.acentoAdvertencia, 1);
+            this.repBar.fillRoundedRect(60, 75 + 10, 75 * (rep / 100), 10, 4);
         }
 
         // Day
-        this.dayText.setText(`📅 Día ${state.day || 1}`);
+        this.dayText.setText(`DÍA ${state.day || 1}`);
 
         // Inventory
         this.invText.setText(`📦 ${state.inventoryCount || 0}/${state.inventoryCapacity || 10}`);

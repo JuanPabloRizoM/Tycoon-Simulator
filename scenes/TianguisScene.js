@@ -44,7 +44,7 @@ export class TianguisScene extends Phaser.Scene {
         // Reset camera on start/restart
         this.cameras.main.resetFX();
         this.cameras.main.setAlpha(1);
-        this.cameras.main.setBackgroundColor(0x87CEEB);
+        this.cameras.main.setBackgroundColor(0xE8A665);
 
         // Initialize systems
         this.economySystem = new EconomySystem();
@@ -143,9 +143,9 @@ export class TianguisScene extends Phaser.Scene {
             0xffffff, // normal
             0xffdddd, // faded red
             0xddffdd, // faded green
-            0xddddff, // faded blue
             0xffffcc, // faded yellow
-            0xffeebb  // faded orange
+            0xffeebb, // faded orange
+            0xffe8d5  // faded peach
         ];
 
         const stallThemes = ['stall_ropa', 'stall_electronica', 'stall_fruta', 'stall_antiguedades'];
@@ -339,7 +339,7 @@ export class TianguisScene extends Phaser.Scene {
         const { width } = this.cameras.main;
 
         const bg = this.add.graphics().setDepth(9992);
-        bg.fillStyle(0x1B5E20, 0.9);
+        bg.fillStyle(0x2C1E12, 0.9);
         bg.fillRoundedRect(width / 2 - 180, 60, 360, 75, 12);
         bg.fillStyle(0x4CAF50, 1);
         bg.fillRoundedRect(width / 2 - 178, 62, 356, 4, 2);
@@ -349,11 +349,11 @@ export class TianguisScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(9993);
 
         const name = this.add.text(width / 2, 108, objective.name, {
-            fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#ffffff'
+            fontSize: '14px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#F5F0E8'
         }).setOrigin(0.5).setDepth(9993);
 
         const reward = this.add.text(width / 2, 126, objective.rewardText, {
-            fontSize: '12px', fontFamily: 'Outfit', color: '#FFD700'
+            fontSize: '12px', fontFamily: 'Outfit', color: '#F0C040'
         }).setOrigin(0.5).setDepth(9993);
 
         // Slide in
@@ -377,17 +377,17 @@ export class TianguisScene extends Phaser.Scene {
         const { width } = this.cameras.main;
 
         const bg = this.add.graphics().setDepth(9990);
-        bg.fillStyle(0x000000, 0.85);
+        bg.fillStyle(0x2C1E12, 0.9);
         bg.fillRoundedRect(width / 2 - 210, 80, 420, 105, 14);
-        bg.fillStyle(0xFFD700, 1);
+        bg.fillStyle(0xF0C040, 1);
         bg.fillRoundedRect(width / 2 - 208, 82, 416, 4, 2);
 
         const title = this.add.text(width / 2, 110, `${event.icon} ${event.name}`, {
-            fontSize: '18px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#FFD700'
+            fontSize: '18px', fontFamily: 'Outfit', fontStyle: 'bold', color: '#F0C040'
         }).setOrigin(0.5).setDepth(9991);
 
         const desc = this.add.text(width / 2, 145, event.description, {
-            fontSize: '13px', fontFamily: 'Outfit', color: '#ffffff',
+            fontSize: '13px', fontFamily: 'Outfit', color: '#F5F0E8',
             wordWrap: { width: 380 }, align: 'center'
         }).setOrigin(0.5).setDepth(9991);
 
@@ -412,7 +412,7 @@ export class TianguisScene extends Phaser.Scene {
         const { width } = this.cameras.main;
         const notif = this.add.text(width / 2, 175, text, {
             fontSize: '22px', fontFamily: 'Outfit', fontStyle: 'bold',
-            color: '#FFD700', stroke: '#4E342E', strokeThickness: 4
+            color: '#FFD54F', stroke: '#2C1E12', strokeThickness: 4
         }).setOrigin(0.5).setDepth(9999).setAlpha(0);
 
         this.tweens.add({
