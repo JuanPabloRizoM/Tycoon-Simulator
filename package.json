@@ -1,0 +1,20 @@
+{
+  "name": "tianguis-tycoon",
+  "version": "1.0.0",
+  "description": "Juego de simulación económica estilo tycoon ambientado en un tianguis mexicano",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "npx http-server game -p 8080 -o",
+    "server": "node backend/server.js",
+    "test": "node tests/run-tests.js"
+  },
+  "dependencies": {
+    "phaser": "^3.80.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
